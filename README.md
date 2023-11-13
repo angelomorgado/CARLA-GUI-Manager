@@ -1,6 +1,6 @@
 # CARLA GUI Manager
 
-This application can manage:
+This application focused on the Carla client can manage:
 - Map selection
 - Weather and time of day
 - NPC vehicles
