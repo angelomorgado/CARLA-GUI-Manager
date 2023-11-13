@@ -10,52 +10,22 @@ It can:
 
 # Imports
 import carla
+from carla_aux import weather_dict, weather_list, connect_to_carla_server
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QLabel
 from PyQt5 import uic
 import sys
+import random
+import time
 
-# Load UI from "manager.ui"
+# UI filename
 uifile = 'manager.ui'
 
-# List of weather presets
-weather_dict = {
-    0 : carla.WeatherParameters.ClearNoon,
-    1 : carla.WeatherParameters.CloudyNoon,
-    2 : carla.WeatherParameters.WetNoon,
-    3 : carla.WeatherParameters.WetCloudyNoon,
-    4 : carla.WeatherParameters.SoftRainNoon,
-    5 : carla.WeatherParameters.MidRainyNoon,
-    6 : carla.WeatherParameters.HardRainNoon,
-    7 : carla.WeatherParameters.ClearSunset,
-    8 : carla.WeatherParameters.CloudySunset,
-    9 : carla.WeatherParameters.WetSunset,
-    10 : carla.WeatherParameters.WetCloudySunset,
-    11 : carla.WeatherParameters.SoftRainSunset,
-    12 : carla.WeatherParameters.MidRainSunset,
-    13 : carla.WeatherParameters.HardRainSunset,
-}
 
-weather_list = [
-    "ClearNoon",
-    "CloudyNoon",
-    "WetNoon",
-    "WetCloudyNoon",
-    "SoftRainNoon",
-    "MidRainyNoon",
-    "HardRainNoon",
-    "ClearSunset",
-    "CloudySunset",
-    "WetSunset",
-    "WetCloudySunset",
-    "SoftRainSunset",
-    "MidRainSunset",
-    "HardRainSunset",
-]
 class Ui(QtWidgets.QMainWindow):
     def __init__(self, carla_client):
-        super(Ui, self).__init__() # Call the inherited classes __init__ method
+        super(Ui, self).__init__()
         uic.loadUi(uifile, self) # Load the .ui file
         self.carla_client = carla_client
 
@@ -67,8 +37,14 @@ class Ui(QtWidgets.QMainWindow):
         # Set buttons
         self.change_map.clicked.connect(self.change_map_action)
         self.change_weather.clicked.connect(self.change_weather_action)
+        self.spawn_vehicles.clicked.connect(self.spawn_vehicles_action)
+        self.delete_vehicles.clicked.connect(self.delete_vehicles_action)
+        self.activate_autopilot.clicked.connect(self.start_autopilot_action)
 
-        self.show() # Show the GUI
+        # Get number of cars to spawn from the spinbox
+        self.num_vehicles = self.number_of_cars.value()
+
+        self.show()
 
     def change_map_action(self):
         map_index = self.map_list.currentIndex()
@@ -86,18 +62,58 @@ class Ui(QtWidgets.QMainWindow):
         world = self.carla_client.get_world()
         world.set_weather(weather_dict[weather_index])
 
-def connect_to_carla_server():
-    client = carla.Client('localhost', 2000)
-    client.set_timeout(100.0)
-    return client
+    def spawn_vehicles_action(self):
+        world = self.carla_client.get_world()
+        self.num_vehicles = self.number_of_cars.value()
+
+        if world.get_actors().filter('vehicle.*'):
+            print('There are vehicles already in the simulation')
+            return
+
+        if self.num_vehicles == 0:
+            print('No vehicles to spawn')
+            return
+
+        vehicle_bp = world.get_blueprint_library().filter('vehicle.*')
+        spawn_points = world.get_map().get_spawn_points()
+        for i in range(self.num_vehicles):
+            vehicle = None
+            while vehicle is None:
+                spawn_point = random.choice(spawn_points)
+                transform = carla.Transform(
+                    spawn_point.location,
+                    spawn_point.rotation
+                )
+                try:
+                    vehicle = world.try_spawn_actor(random.choice(vehicle_bp), transform)
+                except:
+                    # try again if failed to spawn vehicle
+                    pass
+            time.sleep(0.1)
+        print('Successfully spawned {} vehicles!'.format(self.num_vehicles))
+    
+    def delete_vehicles_action(self):
+        world = self.carla_client.get_world()
+        for actor in world.get_actors().filter('vehicle.*'):
+            actor.destroy()
+        print('Successfully deleted all vehicles!')
+    
+    def start_autopilot_action(self):
+        world = self.carla_client.get_world()
+        for actor in world.get_actors().filter('vehicle.*'):
+            actor.set_autopilot(True)
+        print('Successfully started autopilot for all vehicles!')
+
+
 
 def main():
     # Connect to carla server
     client = connect_to_carla_server()
 
     # Initialize gui application
-    app = QtWidgets.QApplication(sys.argv) # Create an instance of QtWidgets.QApplication
-    window = Ui(client) # Create an instance of our class
+    app = QtWidgets.QApplication(sys.argv)
+    window = Ui(client)
+    window.setWindowTitle('Carla GUI Manager')
     window.setFixedSize(window.size()) # Make window non-resizable
     app.exec_() # Start the application
 
