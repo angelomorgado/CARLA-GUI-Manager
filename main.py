@@ -10,6 +10,7 @@ It can:
 
 # Imports
 import carla
+from carla_functions import change_map_action
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QLabel
@@ -43,13 +44,24 @@ class Ui(QtWidgets.QMainWindow):
         self.carla_client = carla_client
 
         # Set combo boxes
-        self.map_list = self.carla_client.get_available_maps()
-        self.weather_list = list(weather_dict.keys())
+        self.available_maps = self.carla_client.get_available_maps()
+        self.map_list.addItems(self.available_maps)
+        self.weather_list.addItems(list(weather_dict.keys()))
 
         # Set buttons
+        self.change_map.clicked.connect(self.change_map_action)
 
         self.show() # Show the GUI
 
+    def change_map_action(self):
+        map_index = self.map_list.currentIndex()
+        world = self.carla_client.get_world()
+        current_map = world.get_map()
+
+        if map_index == current_map:
+            self.carla_client.reload_world()
+        else:
+            self.carla_client.load_world(self.available_maps[map_index])
 
 def connect_to_carla_server():
     client = carla.Client('localhost', 2000)

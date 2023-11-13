@@ -3,4 +3,5 @@ This file contains functions that are used to interact with the CARLA environmen
 '''
 import carla
 
-# TODO
+def change_map_action(client, new_map):
+    pass
