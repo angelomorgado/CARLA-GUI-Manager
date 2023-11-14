@@ -33,6 +33,8 @@
 2. Run Carla server
 3. `python3 main.py`
 
+Make sure you're running on python 3.8 or else the Carla library might not be able to install (you can use anaconda to get python 3.8)
+
 ---
 
 ## My Next project
