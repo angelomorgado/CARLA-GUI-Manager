@@ -9,11 +9,12 @@ It can:
 '''
 
 # Imports
+import typing
 import carla
-from carla_aux import weather_dict, weather_list, connect_to_carla_server
+from carla_aux import weather_dict, weather_list, connect_to_carla_server, is_valid_ip
 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QLabel
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 from PyQt5 import uic
 import qdarktheme
 
@@ -23,11 +24,63 @@ import time
 
 # UI filename and IP of the carla server
 uifile = 'manager.ui'
+loginfile = 'login.ui'
 ip = 'localhost'
 
-class Ui(QtWidgets.QMainWindow):
+class Login_Ui(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Login_Ui, self).__init__()
+        uic.loadUi(loginfile, self) # Load the .ui file
+        qdarktheme.setup_theme('light')
+        # center status bar message
+
+        self.statusBar.showMessage('Please enter the IP and port of the Carla Server.')
+
+        # Set buttons
+        self.confirm_button.clicked.connect(self.login_action)
+    
+    def login_action(self):
+        self.ip = self.ip_set.text().strip()
+        self.port = self.port_set.text().strip()
+
+        # Verify the ip and port
+        # If the port is empty, set it to 2000
+        if self.port == '':
+            self.port = '2000'
+
+        # If the ip is empty, set it to localhost
+        if self.ip == '':
+            self.ip = 'localhost'
+
+        # If the ip is not empty, check if it is a valid ip address
+        if self.ip != 'localhost' and not is_valid_ip(self.ip):
+            self.statusBar.showMessage('Invalid IP address.')
+            return
+        
+        # If the port is not empty, check if it is a valid port number
+        if not self.port.isdigit():
+            self.statusBar.showMessage('Invalid port number.')
+            return
+        else:
+            self.port = int(self.port)
+
+        # Connect if valid
+        self.statusBar.showMessage('Connecting to Carla server, it may take 15 seconds...')
+        self.carla_client = connect_to_carla_server(self.ip, self.port)
+        if self.carla_client is None:
+            self.statusBar.showMessage('Failed to connect to Carla Server!')
+        else:
+            self.statusBar.showMessage('Connected to Carla Server! -- IP: ' + self.ip + ' Port: ' + str(self.port))
+            self.main_window = Main_Ui(self.carla_client)
+            self.main_window.setFixedSize(self.main_window.size())
+
+            # Close the login window
+            self.close()
+            self.main_window.show()
+        
+class Main_Ui(QtWidgets.QMainWindow):
     def __init__(self, carla_client):
-        super(Ui, self).__init__()
+        super(Main_Ui, self).__init__()
         uic.loadUi(uifile, self) # Load the .ui file
         self.carla_client = carla_client
 
@@ -82,6 +135,7 @@ class Ui(QtWidgets.QMainWindow):
     def spawn_vehicles_action(self):
         world = self.carla_client.get_world()
         self.num_vehicles = self.number_of_cars.value()
+        self.update_terminal(f'Spawning {self.num_vehicles} vehicles...')
 
         if world.get_actors().filter('vehicle.*'):
             print('There are vehicles already in the simulation')
@@ -127,14 +181,10 @@ class Ui(QtWidgets.QMainWindow):
         self.update_terminal('Successfully started autopilot for all vehicles.')
 
 def main():
-    # Connect to carla server
-    client = connect_to_carla_server(ip)
-
-    # Initialize gui application
     app = QtWidgets.QApplication(sys.argv)
-    window = Ui(client)
-    window.setWindowTitle('Carla GUI Manager')
+    window = Login_Ui()
     window.setFixedSize(window.size()) # Make window non-resizable
+    window.show()
     app.exec_() # Start the application
 
 if __name__ == '__main__':

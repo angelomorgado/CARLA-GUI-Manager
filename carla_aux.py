@@ -2,11 +2,22 @@
 This file contains functions that are used to interact with the CARLA environment.
 '''
 import carla
+import re
 
-def connect_to_carla_server(ip = 'localhost'):
+def is_valid_ip(ip):
+    ip_pattern = re.compile(
+        r'^((25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$'
+    )
+    return bool(ip_pattern.match(ip))
+
+def connect_to_carla_server(ip = 'localhost', port=2000):
     # If ran in wsl put the ip of the host machine, not just localhost (e.g., 192.168. ...)
-    client = carla.Client(ip, 2000)
-    client.set_timeout(100.0)
+    try:
+        client = carla.Client(ip, port)
+        client.set_timeout(5.0)
+    except Exception as e:
+        print('Error connecting to the server: %s' % e)
+        return None
     return client
 
 # List of weather presets

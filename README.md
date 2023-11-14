@@ -7,10 +7,12 @@ This application focused on the Carla client can manage:
 
 ---
 
-## TODO:
-- Settings with customization
-- Change physics with different weather
-- Add arguments to connect to a specific port, now it only connects to localhost
+## TODO
+
+- Change car physics to adapt to different weather
+
+## Known Issues
+- When connecting to the CARLA server if the connection time expires, it's impossible to catch the error with a try except, i don't know why, tried everything, so the program crashes, if that happens, simply boot it again.
 
 ---
 
