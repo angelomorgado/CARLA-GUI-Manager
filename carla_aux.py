@@ -3,9 +3,9 @@ This file contains functions that are used to interact with the CARLA environmen
 '''
 import carla
 
-def connect_to_carla_server():
+def connect_to_carla_server(ip = 'localhost'):
     # If ran in wsl put the ip of the host machine, not just localhost (e.g., 192.168. ...)
-    client = carla.Client('localhost', 2000)
+    client = carla.Client(ip, 2000)
     client.set_timeout(100.0)
     return client
 

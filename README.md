@@ -8,9 +8,9 @@ This application focused on the Carla client can manage:
 ---
 
 ## TODO:
-- Small terminal window with notifications
 - Settings with customization
 - Change physics with different weather
+- Add arguments to connect to a specific port, now it only connects to localhost
 
 ---
 
