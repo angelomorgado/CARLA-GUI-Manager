@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>931</width>
-    <height>372</height>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -538,10 +538,9 @@
      <property name="title">
       <string>Customize</string>
      </property>
-     <addaction name="actionTheme_1"/>
-     <addaction name="actionTheme_2"/>
+     <addaction name="set_theme1"/>
+     <addaction name="set_theme2"/>
     </widget>
-    <addaction name="actionCenas"/>
     <addaction name="menuCustomize"/>
    </widget>
    <addaction name="menuManager"/>
@@ -551,14 +550,19 @@
     <string>Change IP</string>
    </property>
   </action>
-  <action name="actionTheme_1">
+  <action name="set_theme1">
    <property name="text">
-    <string>Theme 1</string>
+    <string>Dark</string>
    </property>
   </action>
-  <action name="actionTheme_2">
+  <action name="set_theme2">
    <property name="text">
-    <string>Theme 2</string>
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="set_theme3">
+   <property name="text">
+    <string>Auto</string>
    </property>
   </action>
  </widget>

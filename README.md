@@ -22,7 +22,7 @@ This application focused on the Carla client can manage:
 
 ---
 
-## My Next project...
+## My Next project
 
 I'm going to build an ego vehicle and then display the sensors' information in one or multiple windows, possible with pygame or another framework.
 

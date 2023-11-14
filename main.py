@@ -15,6 +15,8 @@ from carla_aux import weather_dict, weather_list, connect_to_carla_server
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QLabel
 from PyQt5 import uic
+import qdarktheme
+
 import sys
 import random
 import time
@@ -30,6 +32,7 @@ class Ui(QtWidgets.QMainWindow):
         self.carla_client = carla_client
 
         self.update_terminal('Connected to Carla Server! -- IP: ' + ip)
+        qdarktheme.setup_theme('auto')
 
         # Set combo boxes
         self.available_maps = self.carla_client.get_available_maps()
@@ -42,6 +45,10 @@ class Ui(QtWidgets.QMainWindow):
         self.spawn_vehicles.clicked.connect(self.spawn_vehicles_action)
         self.delete_vehicles.clicked.connect(self.delete_vehicles_action)
         self.activate_autopilot.clicked.connect(self.start_autopilot_action)
+
+        # Set actions
+        self.set_theme1.triggered.connect(lambda: qdarktheme.setup_theme())
+        self.set_theme2.triggered.connect(lambda: qdarktheme.setup_theme('light'))
 
         # Get number of cars to spawn from the spinbox
         self.num_vehicles = self.number_of_cars.value()
